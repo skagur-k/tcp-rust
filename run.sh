@@ -1,6 +1,13 @@
 #!/bin/bash
 
 cargo b --release
+ext=$?
+if [[ $ext -ne 0 ]]; then
+	kill tcp
+	echo "=== --------- Compiling Failed. Exiting ----------- ==="
+	exit $ext
+fi
+
 sudo setcap cap_net_admin=eip $CARGO_TARGET_DIR/release/tcp
 $CARGO_TARGET_DIR/release/tcp &
 pid=$!
@@ -12,7 +19,6 @@ cleanup(){
 	kill $pid
 	exit
 }
-
 
 trap cleanup INT TERM
 wait $pid
